@@ -15,7 +15,6 @@ from pathlib import Path
 import numpy as np
 import pytest
 import xarray as xr
-
 from radioskysims_core.logging_config import (
     bind_context,
     configure_logging,
@@ -23,8 +22,8 @@ from radioskysims_core.logging_config import (
     unbind_context,
 )
 
-Beam = pytest.importorskip("radioskysims.domain.beam.models").Beam
-BeamOperation = pytest.importorskip("radioskysims.domain.beam.services").BeamOperation
+Beam = pytest.importorskip("radioskysims_beam.domain.beam.models").Beam
+BeamOperation = pytest.importorskip("radioskysims_beam.domain.beam.services").BeamOperation
 
 
 class TestLoggingConfiguration:
@@ -114,9 +113,7 @@ class TestLoggingConfiguration:
                 lines = f.readlines()
                 # A última linha deve ser o log da exceção
                 log_entry = json.loads(lines[-1])
-                assert "exc_info" in log_entry or "exception" in log_entry.get(
-                    "event", ""
-                )
+                assert "exc_info" in log_entry or "exception" in log_entry.get("event", "")
 
     def test_multiple_loggers_in_same_session(self):
         """Verifica que múltiplos loggers funcionam na mesma sessão."""
@@ -171,9 +168,7 @@ class TestLoggingConfiguration:
 
                 # Valida ISO 8601 (aproximado)
                 iso_pattern = r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}"
-                assert re.match(iso_pattern, timestamp), (
-                    f"Timestamp não é ISO 8601: {timestamp}"
-                )
+                assert re.match(iso_pattern, timestamp), f"Timestamp não é ISO 8601: {timestamp}"
 
     def test_log_level_filtering(self):
         """Verifica que level filtering funciona."""

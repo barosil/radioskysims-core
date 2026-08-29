@@ -42,7 +42,7 @@ def _lazy_SatID():
     """
     if "SatID" not in _lazy_cache:
         _lazy_cache["SatID"] = importlib.import_module(
-            "radioskysims.infrastructure.db.satellite.models"
+            "radioskysims_sources.infrastructure.db.satellite.models"
         ).SatID
     return _lazy_cache["SatID"]
 
@@ -228,9 +228,7 @@ class TrackFactory:
             Tracks = _lazy_Tracks()
             result = Tracks.from_xr(ds)
 
-            logger.info(
-                "track_build_complete", num_satellites=len(result.satellite_names)
-            )
+            logger.info("track_build_complete", num_satellites=len(result.satellite_names))
             return result
         except Exception as e:
             logger.exception("track_build_complete_failed", error=str(e))
@@ -293,9 +291,7 @@ class SkyfieldAdapter:
         Returns:
             Skyfield time object.
         """
-        return (
-            timerange.to_skyfield() if hasattr(timerange, "to_skyfield") else timerange
-        )
+        return timerange.to_skyfield() if hasattr(timerange, "to_skyfield") else timerange
 
     def earthsatellite(self, satellite: Any):
         """
