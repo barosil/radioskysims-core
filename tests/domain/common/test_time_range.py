@@ -64,7 +64,10 @@ def test_to_astropy():
 
 
 def test_to_datetime64_exact_step():
-    from radioskysims.application.services.simulation_service import _compute_time_grid
+    # _compute_time_grid vive no pacote simulation (Fase 5)
+    from radioskysims_simulation.application.services.simulation_service import (
+        _compute_time_grid,
+    )
 
     tr = TimeRange.from_iso("2026-07-26T00:00:00", "2026-07-26T00:20:00", resolution=600)
     grid = tr.to_datetime64()
