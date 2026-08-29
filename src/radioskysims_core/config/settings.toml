@@ -1,0 +1,81 @@
+[paths]
+raw_data_folder = "data/raw/"
+auxiliary_data_folder = "data/aux/"
+log_folder = "data/logs/"
+skyfield_folder="data/aux/skyfield/"
+
+[ports]
+db_port = 5432
+panel_port = 8080
+
+[radiotelescopes]
+[radiotelescopes.default]
+name = "Default Telescope"
+
+[radiotelescopes.default.observer]
+lat = 40.5678
+lon = -72.1234
+height = 0.0
+
+[radiotelescopes.default.antenna]
+name = "Horn"
+frequency_range = [900, 1300, 1]
+
+[radiotelescopes.default.antenna.pointing]
+mode = "transit"
+alt_deg = 90.0
+az_deg = 0.0
+
+[radiotelescopes.default.antenna.beam]
+name = "Default Beam"
+polarizations = ["horizontal", "vertical"]
+pattern_file = "radioskysims/resources/beams/default_beam.csv"
+
+[radiotelescopes.default.backend]
+type = "spectrometer"
+frequency_range = [900, 1300, 1]
+name = "Default Backend"
+bandwidth_mhz = 400
+sampling_rate_mhz = 1
+integration_time_s = 60
+num_channels = 1024
+T_sys_K = 50
+
+[simulations]
+time_range = [0, 86400, 60] # start, end, step in seconds
+
+[beams]
+name = "Default Beam"
+file_path = "radioskysims/resources/beams/beampattern_horn01.csv"
+
+[catalogs]
+
+[catalogs.radiosources]
+name = "Default Radio Sources Catalog"
+url = "src/radioskysims/resources/catalogs/default_radiosources.csv"
+
+[catalogs.spectral_indexes]
+name = "Default Spectral Index Catalog"
+url = "src/radioskysims/resources/catalogs/default_spectral_indexes.csv"
+
+[radiosources]
+query_str = "SELECT * FROM radiosources WHERE flux > 0.1"
+
+
+[noisemodels]
+pysm3_component = ["synchrotron"]
+
+[satellites]
+constellations = ["GPS"]
+satellites = ["GPS IIF-1", "GPS IIF-2"]
+
+
+[signals]
+sat_signals = "radioskysims/resources/satellites/sat_signals.json"
+
+[DB]
+POSTGRES_USER = "radio" 
+POSTGRES_PASSWORD = "radio"
+POSTGRES_HOST = "localhost"
+POSTGRES_PORT = 5432
+POSTGRES_DB = "radioskysims"
