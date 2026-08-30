@@ -159,15 +159,21 @@ class SystemMonitor:
         """
         res = self.snapshot(disk_path=disk_path)
         if not self.can_fit(footprint_mb, reserved_mb=reserved_mb):
-            raise MemoryError(
+            msg = (
                 f"Memória insuficiente: footprint ~{footprint_mb:.0f} MB + reserva "
                 f"{reserved_mb:.0f} MB > disponível {res.available_memory_mb:.0f} MB"
             )
+            raise MemoryError(
+                msg
+            )
         if min_disk_mb is not None and res.available_disk_mb is not None:
             if res.available_disk_mb < min_disk_mb:
-                raise OSError(
+                msg = (
                     f"Espaço em disco insuficiente: {res.available_disk_mb:.0f} MB "
                     f"disponíveis < {min_disk_mb:.0f} MB exigidos"
+                )
+                raise OSError(
+                    msg
                 )
         log.debug("Recursos OK: %s", res.as_dict())
 

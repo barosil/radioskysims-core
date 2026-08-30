@@ -170,7 +170,8 @@ def _build_time_range_from_config(
     else:
         tr = tr_cfg
     if len(tr) != 3:
-        raise ValueError("settings.toml: time_range must be a 3-item list")
+        msg = "settings.toml: time_range must be a 3-item list"
+        raise ValueError(msg)
 
     t0, t1, dt = tr
     if isinstance(t0, (int, float)) and isinstance(t1, (int, float)):
@@ -210,11 +211,13 @@ def build_observer_from_settings(
     else:
         location = cfg.get("location", [0.0, 0.0])
         if not isinstance(location, (list, tuple)) or len(location) != 2:
-            raise ValueError("settings.toml: location must be a 2-item list")
+            msg = "settings.toml: location must be a 2-item list"
+            raise ValueError(msg)
 
         order = location_order or cfg.get("location_order", "lonlat")
         if order not in {"lonlat", "latlon"}:
-            raise ValueError("location_order must be 'lonlat' or 'latlon'")
+            msg = "location_order must be 'lonlat' or 'latlon'"
+            raise ValueError(msg)
 
         if order == "latlon":
             lat, lon = location
@@ -268,7 +271,8 @@ def build_radiotelescope_from_settings(
         set_settings_file(settings_file)
     cfg = load_config(f"radiotelescopes.{name}")
     if not cfg:
-        raise ValueError(f"settings.toml: radiotelescopes.{name} not found")
+        msg = f"settings.toml: radiotelescopes.{name} not found"
+        raise ValueError(msg)
 
     observer = build_observer_from_settings(f"radiotelescopes.{name}")
 
