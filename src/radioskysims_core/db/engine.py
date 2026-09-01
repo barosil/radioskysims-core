@@ -33,15 +33,11 @@ class Database:
             "POSTGRES_PORT": POSTGRES_PORT,
             "POSTGRES_DB": POSTGRES_DB,
         }
-        self.db = (
-            f"{self.credentials['POSTGRES_HOST']}:{self.credentials['POSTGRES_PORT']}"
-        )
+        self.db = f"{self.credentials['POSTGRES_HOST']}:{self.credentials['POSTGRES_PORT']}"
         self.uri = self._build_uri()
         self.model = model
         self.engine = self._create_engine()
-        self._sessionmaker = sessionmaker(
-            self.engine, class_=Session, expire_on_commit=False
-        )
+        self._sessionmaker = sessionmaker(self.engine, class_=Session, expire_on_commit=False)
 
     # =========================================================
     # Engine / URI
@@ -72,9 +68,7 @@ class Database:
         try:
             inspector = inspect(self.engine)
             tables = inspector.get_table_names()
-            tables_list = (
-                ", ".join(tables) if tables else "— nenhuma tabela encontrada —"
-            )
+            tables_list = ", ".join(tables) if tables else "— nenhuma tabela encontrada —"
         except Exception as e:
             tables_list = f"⚠️ erro ao inspecionar ({type(e).__name__}: {e})"
 
@@ -97,7 +91,7 @@ class Database:
 
     def _create_engine(self) -> Engine:
         """Cria engine única para a instância Database."""
-        logger.debug("Criando engine para URI: %s", self.uri)
+        logger.debug("Criando engine para %s", self.db)
         log_db_event(slogger, "db_engine_create", operation="connect", table=None)
         return create_engine(self.uri, echo=False, future=True)
 
@@ -127,9 +121,7 @@ class Database:
             with self.session() as session:
                 session.exec(select(1))
             logger.info("Conexão com o banco de dados bem-sucedida.")
-            log_db_event(
-                slogger, "db_connection_ok", operation="select", table="healthcheck"
-            )
+            log_db_event(slogger, "db_connection_ok", operation="select", table="healthcheck")
             return True
         except SQLAlchemyError as e:
             logger.error("Erro ao conectar ao banco de dados: %s", e)
@@ -154,9 +146,7 @@ class Database:
         try:
             # use SQLModel.metadata to ensure correct metadata is used
             SQLModel.metadata.create_all(self.engine)
-            logger.info(
-                "Tabela criada para modelo %s", getattr(mdl, "__tablename__", str(mdl))
-            )
+            logger.info("Tabela criada para modelo %s", getattr(mdl, "__tablename__", str(mdl)))
             log_db_event(
                 slogger,
                 "db_create_table",
