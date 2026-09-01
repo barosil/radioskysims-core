@@ -623,3 +623,32 @@ class Observer(BaseModel):
                 "time_internal": "MJD/JD",
             },
         }
+
+    def view(self):
+        """Retorna uma visão interativa (holoviews) do observador.
+
+        Renderiza um mapa com tiles OSM e a localização do observador.
+        O import de ``radioskysims-viz`` é lazy (mesmo padrão do
+        ``config_loader``), mantendo o núcleo importável sem visualização.
+
+        Exemplo (notebook)::
+
+            uirapuru.observer.view()  # mapa interativo
+
+        Returns:
+            ``hv.Overlay`` (tiles * pontos) quando ``radioskysims-viz``
+            estiver disponível.
+
+        Raises:
+            ImportError: Se ``radioskysims-viz``/holoviews não estiverem
+                instalados.
+        """
+        try:
+            from radioskysims_viz.radiotelescope import observer_map
+        except ImportError as exc:  # pragma: no cover - ambiente sem viz
+            msg = (
+                "Observer.view() requer 'radioskysims-viz' (holoviews). "
+                "Instale com: uv sync --extra viz (ou --extra all)."
+            )
+            raise ImportError(msg) from exc
+        return observer_map(self)
