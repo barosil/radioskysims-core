@@ -49,5 +49,8 @@ packages = ["src/radioskysims_core"]
 minversion = "6.0"
 addopts = ["-ra", "--strict-markers", "--strict-config"]
 xfail_strict = true
-filterwarnings = ["error"]
+filterwarnings = [
+  "error",
+  "ignore:.*is not a Python type.*:UserWarning:pydantic",
+]
 testpaths = ["tests"]
