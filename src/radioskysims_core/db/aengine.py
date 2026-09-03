@@ -16,7 +16,12 @@ from collections.abc import AsyncGenerator
 from urllib.parse import quote_plus
 
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 from sqlmodel import SQLModel, select
 
 from radioskysims_core.config.config_loader import load_config
@@ -62,25 +67,47 @@ def build_async_uri() -> str:
 
 
 ASYNC_DATABASE_URI = build_async_uri()
-async_engine = None
-AsyncSessionLocal = None
-try:
-    async_engine = create_async_engine(
-        ASYNC_DATABASE_URI,
-        echo=False,  # pode ativar True para debug
-        future=True,
-        pool_pre_ping=True,
-    )
-    AsyncSessionLocal = async_sessionmaker(
-        async_engine,
-        expire_on_commit=False,
-        class_=AsyncSession,
-    )
-except ModuleNotFoundError as exc:
-    logger.warning(
-        "asyncpg não disponível no ambiente; async_engine não foi criado: %s",
-        exc,
-    )
+
+# Engine async LAZY: nada é criado no import (evita ruído no startup de CLIs e
+# notebooks que não usam banco async — auditoria de UX, item R1). A engine só é
+# criada no primeiro uso real; asyncpg é opcional (extra de banco).
+async_engine: AsyncEngine | None = None
+AsyncSessionLocal: async_sessionmaker[AsyncSession] | None = None
+
+
+def _ensure_async_engine() -> tuple[AsyncEngine, async_sessionmaker[AsyncSession]]:
+    """Cria (sob demanda) e cacheia a engine async + sessionmaker.
+
+    Raises:
+        RuntimeError: se o driver async (asyncpg) não estiver instalado —
+            apenas quando o banco async é realmente utilizado.
+    """
+    global async_engine, AsyncSessionLocal
+
+    if async_engine is None or AsyncSessionLocal is None:
+        try:
+            engine = create_async_engine(
+                ASYNC_DATABASE_URI,
+                echo=False,  # pode ativar True para debug
+                future=True,
+                pool_pre_ping=True,
+            )
+        except ModuleNotFoundError as exc:
+            msg = (
+                "asyncpg não está instalado no ambiente; instale o extra de "
+                "banco assíncrono (ex.: radioskysim[db]) para usar a engine async."
+            )
+            raise RuntimeError(msg) from exc
+        async_engine = engine
+        AsyncSessionLocal = async_sessionmaker(
+            engine,
+            expire_on_commit=False,
+            class_=AsyncSession,
+        )
+
+    # Garantia por construção: se chegou aqui, ambas estão definidas.
+    assert async_engine is not None and AsyncSessionLocal is not None
+    return async_engine, AsyncSessionLocal
 
 
 # =========================================================
@@ -103,7 +130,8 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
         >>> async for session in get_session():
         ...     result = await session.execute(select(Satellite))
     """
-    async with AsyncSessionLocal() as session:
+    _, session_local = _ensure_async_engine()
+    async with session_local() as session:
         try:
             yield session
         except SQLAlchemyError as e:
@@ -119,7 +147,8 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
 # =========================================================
 async def init_db() -> None:
     """Cria todas as tabelas no banco (DDL)."""
-    async with async_engine.begin() as conn:
+    engine, _ = _ensure_async_engine()
+    async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
     logger.info("✅ Tabelas criadas com sucesso.")
     log_db_event(slogger, "adb_init", operation="create_all", table="*")
@@ -127,7 +156,8 @@ async def init_db() -> None:
 
 async def clear_db() -> None:
     """Remove todas as tabelas (DANGER: use com cautela)."""
-    async with async_engine.begin() as conn:
+    engine, _ = _ensure_async_engine()
+    async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.drop_all)
     logger.warning("⚠️ Todas as tabelas foram removidas do banco!")
     log_db_event(slogger, "adb_clear", operation="drop_all", table="*")
@@ -136,13 +166,12 @@ async def clear_db() -> None:
 async def test_connection() -> bool:
     """Testa a conexão com o banco de dados."""
     try:
-        async with async_engine.connect() as conn:
+        engine, _ = _ensure_async_engine()
+        async with engine.connect() as conn:
             result = await conn.execute(select(1))
             _ = result.scalar()
         logger.info("Conexão com o banco de dados bem-sucedida.")
-        log_db_event(
-            slogger, "adb_connection_ok", operation="select", table="healthcheck"
-        )
+        log_db_event(slogger, "adb_connection_ok", operation="select", table="healthcheck")
         return True
     except SQLAlchemyError as e:
         logger.error("Erro ao conectar ao banco: %s", e)

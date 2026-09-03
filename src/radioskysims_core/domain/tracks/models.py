@@ -7,7 +7,7 @@ import threading
 from typing import Any
 
 import numpy as np
-from pydantic import BaseModel, ConfigDict, Field, SkipValidation, field_validator
+from pydantic import BaseModel, ConfigDict, PrivateAttr, field_validator
 
 from ._lazy import lazy_np, lazy_xr
 
@@ -41,16 +41,32 @@ class Tracks(BaseModel):
     satellite_names: list[str]
     time_range: tuple[str, str]
 
-    lock: SkipValidation[threading.Lock] = Field(default_factory=threading.Lock, exclude=True)
-    async_lock: SkipValidation[asyncio.Lock] = Field(default_factory=asyncio.Lock, exclude=True)
-    log: SkipValidation[LogType] = Field(
-        default_factory=lambda: logging.getLogger("tracks"), exclude=True
-    )
+    _lock: threading.Lock = PrivateAttr(default_factory=threading.Lock)
+    _async_lock: asyncio.Lock = PrivateAttr(default_factory=asyncio.Lock)
+    _log: LogType = PrivateAttr(default_factory=lambda: logging.getLogger("tracks"))
 
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         validate_assignment=True,
     )
+
+    # Atributos de runtime (locks/logger) expostos via properties: não fazem
+    # parte do schema pydantic (evita UserWarning do pydantic no import com
+    # threading.Lock/asyncio.Lock — auditoria de UX, R1).
+    @property
+    def lock(self) -> threading.Lock:
+        """Lock para acesso thread-safe (runtime)."""
+        return self._lock
+
+    @property
+    def async_lock(self) -> asyncio.Lock:
+        """Lock para acesso assíncrono (runtime)."""
+        return self._async_lock
+
+    @property
+    def log(self) -> LogType:
+        """Logger de debug (runtime)."""
+        return self._log
 
     # ==========================================================
     # Validation

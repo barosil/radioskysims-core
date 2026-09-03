@@ -17,13 +17,12 @@ from .job_repository import JobRepository
 from .jobs import Job, JobStatus
 from .models import load_registered_models, register_model_module
 
-try:  # aengine depende de drivers async (asyncpg); opcional
-    from .aengine import AsyncDatabase  # noqa: F401
-except Exception:  # pragma: no cover
-    AsyncDatabase = None  # type: ignore[assignment,misc]
+# Nota: a engine async (aengine) NÃO é importada aqui — é 100% lazy e só é
+# criada sob demanda (evita efeito colateral/ruído no import; asyncpg é
+# opcional, via extra de banco). Não existe classe `AsyncDatabase` concreta
+# neste pacote.
 
 __all__ = [
-    "AsyncDatabase",
     "Database",
     "Job",
     "JobRepository",

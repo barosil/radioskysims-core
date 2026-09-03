@@ -38,6 +38,12 @@ dependencies = [
   "python-dotenv>=1.0",
 ]
 
+[project.optional-dependencies]
+# Driver async do PostgreSQL — opcional: a engine async (radioskysims_core.db.aengine)
+# é lazy e só exige asyncpg no uso real do banco assíncrono. Instalar com:
+#   uv sync --extra db   (no pacote)  ou  pip install "radioskysims-core[db]"
+db = ["asyncpg>=0.29"]
+
 [project.urls]
 Homepage = "https://github.com/barosil/RadioSkySim"
 "Bug Tracker" = "https://github.com/barosil/RadioSkySim/issues"

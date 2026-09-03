@@ -23,6 +23,19 @@ from radioskysims_core.db.jobs import Job, JobStatus
 DEFAULT_JOBS_DB = "sqlite:///data/jobs.db"
 
 
+def default_jobs_db() -> str:
+    """URL SQLite padrão do banco de jobs, resolvida na RAÍZ do projeto.
+
+    Ao contrário de ``DEFAULT_JOBS_DB`` (relativa ao CWD), usa a raiz detectada
+    por ``get_project_root`` — caminho estável independente do diretório de
+    execução (uniformização de caminhos — UX M4).
+    """
+    from radioskysims_core.paths import get_project_root
+
+    db_path = get_project_root() / "data" / "jobs.db"
+    return f"sqlite:///{db_path}"
+
+
 def _status_value(status: JobStatus | str) -> str:
     """Normaliza um status (enum ou string) para o valor textual."""
     return status.value if isinstance(status, JobStatus) else str(status)
@@ -139,4 +152,4 @@ class JobRepository:
         self.engine.dispose()
 
 
-__all__ = ["DEFAULT_JOBS_DB", "JobRepository"]
+__all__ = ["DEFAULT_JOBS_DB", "JobRepository", "default_jobs_db"]
