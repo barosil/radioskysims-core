@@ -4,7 +4,7 @@ Módulo: src/radioskysims/domain/common/science_validator.py
 Descrição:
     Validador de correção física na simulação de radioastronomia.
     Implementa checagens de unidades, normalização e limites físicos.
-    
+
 Padrão DDD:
     Esta classe reside no domínio (Value Object) e implementa regras de negócio
     relacionadas a validação física. Não contém imports de infraestrutura,
@@ -21,12 +21,12 @@ from scipy.constants import c, k
 class ScienceValidator:
     """
     Valida correção da física na simulação de radioastronomia.
-    
+
     Implementa validações de:
     - Unidades de Density Spectral Power (PSD)
     - Normalização de padrão de radiação (beam)
     - Conversão PSD ↔ Temperatura brilho
-    
+
     Métodos são estáticos (Value Object pattern).
     """
 
@@ -34,26 +34,24 @@ class ScienceValidator:
     def validate_psd_units(psd: xr.DataArray, expected_units: str = "W/Hz") -> None:
         """
         Valida que Power Spectral Density (PSD) está nas unidades corretas.
-        
+
         Args:
             psd: DataArray do xarray com atributo 'units'.
             expected_units: Unidade esperada (default: "W/Hz").
-        
+
         Raises:
             ValueError: Se unidades não correspondem às esperadas.
-        
+
         Example:
             >>> data = xr.DataArray([1, 2, 3], attrs={"units": "W/Hz"})
             >>> ScienceValidator.validate_psd_units(data)  # OK
-            
+
             >>> bad_data = xr.DataArray([1, 2, 3], attrs={"units": "V/Hz"})
             >>> ScienceValidator.validate_psd_units(bad_data)  # Raises ValueError
         """
         actual_units = psd.attrs.get("units", "unknown")
         if actual_units != expected_units:
-            msg = (
-                f"PSD units: expected {expected_units}, got {actual_units}"
-            )
+            msg = f"PSD units: expected {expected_units}, got {actual_units}"
             raise ValueError(msg)
 
     @staticmethod
@@ -103,9 +101,7 @@ class ScienceValidator:
 
         # Valida que está normalizado (tolerância de 5%)
         if not (0.95 <= integral <= 1.05):
-            msg = (
-                f"Beam integral: {integral:.3f} (expected 1.0 ± 5%)"
-            )
+            msg = f"Beam integral: {integral:.3f} (expected 1.0 ± 5%)"
             raise ValueError(msg)
 
         return float(integral)
@@ -164,10 +160,7 @@ class ScienceValidator:
 
         # Valida que está em faixa razoável
         if not (expected_temp_range[0] <= T <= expected_temp_range[1]):
-            msg = (
-                f"Unrealistic temperature: {T:.2e} K "
-                f"(expected {expected_temp_range})"
-            )
+            msg = f"Unrealistic temperature: {T:.2e} K (expected {expected_temp_range})"
             raise ValueError(msg)
 
         return float(T)
