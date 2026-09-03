@@ -1,22 +1,117 @@
 """
 Módulo: src/radioskysims/domain/geometry/interface.py
 
-Descrição:
-    Re-export do port canônico GeometryProviderPort como GeometryProvider.
+Port de geometria observacional (GeometryProviderPort).
 
-    Mantido para compatibilidade retroativa. O port canônico está em
-    ``application/ports/geometry.py``. Novos códigos devem importar
-    ``GeometryProviderPort`` diretamente de ``application.ports``.
-
-    Interface para provedores de geometria observacional.
-    Define o contrato para cálculo de parâmetros geométricos
-    (distância, ângulos, azimute, elevação) entre observador e satélites.
+Define o contrato canônico entre o domínio e as implementações concretas de
+cálculo geométrico (Skyfield, etc). O contrato vive no domínio para que
+implementações (adapters) e casos de uso dependam apenas da abstração, sem
+inverter dependências. ``GeometryProvider`` é mantido como alias de
+compatibilidade retroativa.
 """
 
 from __future__ import annotations
 
-from radioskysims_core.application.ports.geometry import (
-    GeometryProviderPort as GeometryProvider,
-)
+from abc import ABC, abstractmethod
+from typing import Any
 
-__all__ = ["GeometryProvider"]
+import xarray as xr
+
+
+class GeometryProviderPort(ABC):
+    """
+    Port para cálculo de geometria observacional.
+
+    Define o contrato para implementações que calculam parâmetros
+    geométricos entre um observador fixo e trajetórias de satélites,
+    sem comprometer a implementação concreta (Skyfield, etc).
+    """
+
+    @abstractmethod
+    def compute(
+        self,
+        tracks: Any,
+        observer: Any,
+        sat_block: Any | None = None,
+    ) -> xr.Dataset:
+        """
+        Calcula parâmetros geométricos observacionais.
+
+        Retorna um Dataset com dimensão 'time' contendo as variáveis:
+        - theta(time): Ângulo entre satélite e feixe (radianos)
+        - range(time): Distância satélite-observador (metros)
+        - az(time): Azimute (radianos, opcional)
+        - el(time): Elevação (radianos, opcional)
+
+        Args:
+            tracks: Dataset com trajetórias dos satélites (time, satellite).
+            observer: Observador/estação terrestre com atributos lat, lon, alt.
+            sat_block: Bloco de satélites específicos (opcional).
+
+        Returns:
+            xr.Dataset: Dataset com dimensão 'time' e variáveis geométricas.
+
+        Raises:
+            ValueError: Se inputs estão em formato inválido.
+            RuntimeError: Se cálculo não puder ser realizado.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def calculate_position(
+        self,
+        satellite: Any,
+        time: Any,
+        observer_lat: float,
+        observer_lon: float,
+    ) -> tuple[Any, Any, Any]:
+        """
+        Calcula posição (theta, phi, range) de um satélite.
+
+        Args:
+            satellite: Objeto satélite da infraestrutura.
+            time: Timestep (pode ser Skyfield Time, numpy array, etc).
+            observer_lat: Latitude do observador (graus).
+            observer_lon: Longitude do observador (graus).
+
+        Returns:
+            tuple: (theta, phi, range) onde:
+                - theta: Ângulo zenital (radianos)
+                - phi: Azimute (radianos)
+                - range: Distância (metros)
+
+        Raises:
+            ValueError: Se parâmetros inválidos.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def calculate_range(
+        self,
+        satellite: Any,
+        time: Any,
+        observer_lat: float | None = None,
+        observer_lon: float | None = None,
+    ) -> Any:
+        """
+        Calcula distância satélite-observador.
+
+        Args:
+            satellite: Objeto satélite da infraestrutura.
+            time: Timestep.
+            observer_lat: Latitude do observador (opcional).
+            observer_lon: Longitude do observador (opcional).
+
+        Returns:
+            Distance: Distância em metros (ou array de distâncias).
+
+        Raises:
+            ValueError: Se parâmetros inválidos.
+        """
+        raise NotImplementedError
+
+
+# Alias de compatibilidade retroativa (consumidores antigos usam GeometryProvider).
+GeometryProvider = GeometryProviderPort
+
+__all__ = ["GeometryProviderPort", "GeometryProvider"]
