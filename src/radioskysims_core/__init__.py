@@ -25,4 +25,7 @@ from __future__ import annotations
 
 __version__ = "0.1.0"
 
-__all__ = ["__version__"]
+# API pública do kernel (UX Onda 3/R6): expõe os tipos centrais na raiz.
+from .domain.common import FrequencyRange, Observer, TimeRange  # noqa: E402
+
+__all__ = ["FrequencyRange", "Observer", "TimeRange", "__version__"]
