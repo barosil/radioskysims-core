@@ -60,3 +60,9 @@ def test_exports(numpy_ds):
         h5path = os.path.join(tmp, "out.nc")
         numpy_ds.to_hdf5(h5path)
         assert os.path.exists(h5path)
+
+
+def test_tracks_uses_domain_logger(numpy_ds) -> None:
+    from radioskysims_core.domain.common.logging import DomainLogger
+
+    assert isinstance(numpy_ds.log, DomainLogger)

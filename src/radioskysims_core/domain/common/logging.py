@@ -29,7 +29,11 @@ class DomainLogger:
         self._logger = logging.getLogger(name)
 
     def debug(self, event: str, **kwargs: Any) -> None:
-        self._logger.debug(_structured(event, kwargs))
+        exc_info = kwargs.pop("exc_info", None)
+        self._logger.debug(
+            _structured(event, kwargs),
+            exc_info=exc_info,
+        )
 
     def info(self, event: str, **kwargs: Any) -> None:
         self._logger.info(_structured(event, kwargs))

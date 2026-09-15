@@ -2,17 +2,18 @@ from __future__ import annotations
 
 import asyncio
 import importlib
-import logging
 import threading
 from typing import Any
 
 import numpy as np
 from pydantic import BaseModel, ConfigDict, PrivateAttr, field_validator
 
+from radioskysims_core.domain.common.logging import DomainLogger, get_domain_logger
+
 from ._lazy import lazy_np, lazy_xr
 
 ChunkIndex = tuple[int, ...]
-LogType = logging.Logger
+LogType = DomainLogger
 
 
 class Tracks(BaseModel):
@@ -43,7 +44,7 @@ class Tracks(BaseModel):
 
     _lock: threading.Lock = PrivateAttr(default_factory=threading.Lock)
     _async_lock: asyncio.Lock = PrivateAttr(default_factory=asyncio.Lock)
-    _log: LogType = PrivateAttr(default_factory=lambda: logging.getLogger("tracks"))
+    _log: LogType = PrivateAttr(default_factory=lambda: get_domain_logger("tracks"))
 
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -109,7 +110,7 @@ class Tracks(BaseModel):
     def _validate_xyz_coords(ds) -> None:
         try:
             if list(map(str, ds["xyz"].values)) != ["x", "y", "z"]:
-                logging.getLogger("tracks").debug("Coord xyz fora do padrão")
+                get_domain_logger("tracks").debug("tracks_xyz_coordinates_nonstandard")
         except Exception:
             pass
 
