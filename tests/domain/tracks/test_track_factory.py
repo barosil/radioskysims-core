@@ -14,7 +14,7 @@ def test_factory_init():
     reason="API legada do TrackFactory (attr 'loader') não existe mais no core; "
     "verificar cobertura atual em tests/domain/test_tracks.py."
 )
-def test_loader_lazy(fake_skyfield):
+def test_loader_lazy(fake_skyfield):  # noqa: ARG001
     factory = TrackFactory({})
     loader1 = factory.loader
     loader2 = factory.loader
@@ -38,7 +38,7 @@ class FakeSat:
 
 
 @pytest.mark.skip(reason="API legada do TrackFactory ('_build_earthsat') não existe mais no core.")
-def test_satellite_cache(fake_skyfield):
+def test_satellite_cache(fake_skyfield):  # noqa: ARG001
     factory = TrackFactory({})
     sat = FakeSat()
 
@@ -50,7 +50,7 @@ def test_satellite_cache(fake_skyfield):
 
 
 @pytest.mark.skip(reason="API legada do TrackFactory ('_lazy_Tracks') não existe mais no core.")
-def test_build_tracks_returns_tracks(monkeypatch, fake_skyfield):
+def test_build_tracks_returns_tracks(monkeypatch, fake_skyfield):  # noqa: ARG001
     class FakeTracks:
         @classmethod
         def from_xr(cls, ds):

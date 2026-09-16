@@ -15,7 +15,7 @@ class FakeAt:
 
 
 class FakeEarthSatellite:
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **_kwargs):
         pass
 
     def at(self, times):
@@ -23,7 +23,7 @@ class FakeEarthSatellite:
 
 
 class FakeTimescale:
-    def utc(self, *args, **kwargs):
+    def utc(self, *args, **_kwargs):
         return args
 
     def from_datetimes(self, times):
