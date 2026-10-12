@@ -63,6 +63,22 @@ def test_range_and_value():
     assert np.allclose(fr.value, np.arange(100, 201, 10))
 
 
+def test_value_no_off_by_one_when_span_is_exact_multiple():
+    """Regressão: grid normalizado por ``num_channels`` não gera n+1 pontos.
+
+    ``FrequencyRange.from_floats(min, max, (max-min)/(n-1))`` (usado pela
+    normalização por canais) produzia ``n + 1`` pontos por ruído de ponto
+    flutuante no ``np.arange`` inclusivo.
+    """
+    n = 4096
+    res = (1245.0 - 995.0) / (n - 1)
+    fr = FrequencyRange.from_floats(995.0, 1245.0, res)
+
+    assert len(fr.value) == n
+    assert np.isclose(fr.value[0], 995.0)
+    assert np.isclose(fr.value[-1], 1245.0)
+
+
 def test_summary():
     fr = FrequencyRange.from_floats(100, 110, 5)
     summary = fr.summary()

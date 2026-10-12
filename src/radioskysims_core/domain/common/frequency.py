@@ -86,7 +86,16 @@ class FrequencyRange(BaseModel):
     def value(self) -> np.ndarray:
         if self.resolution_mhz == 0:
             return np.array([self.min_mhz])
-        return np.arange(self.min_mhz, self.max_mhz + self.resolution_mhz, self.resolution_mhz)
+        values = np.arange(
+            self.min_mhz, self.max_mhz + self.resolution_mhz, self.resolution_mhz
+        )
+        # ``np.arange`` pode incluir um ponto extra quando ``(max-min)/res`` é
+        # um inteiro exato (ruído de ponto flutuante), ex.: um grid
+        # normalizado por ``num_channels`` gera ``num_channels + 1`` pontos.
+        # Remove o ponto que fica ~1 resolução acima do máximo.
+        if values.size > 1 and (values[-1] - self.max_mhz) >= self.resolution_mhz * 0.999:
+            values = values[:-1]
+        return values
 
     @property
     def range(self):
