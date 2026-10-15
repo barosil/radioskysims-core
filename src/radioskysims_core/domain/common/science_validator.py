@@ -17,6 +17,8 @@ import numpy as np
 import xarray as xr
 from scipy.constants import c, k
 
+from radioskysims_core.domain.common.beam_geometry import solid_angle
+
 
 class ScienceValidator:
     """
@@ -75,8 +77,9 @@ class ScienceValidator:
             ValueError: Se integral está fora do intervalo [0.95, 1.05].
 
         Notes:
-            - Assumindo simetria azimutal, Ω = 2π ∫₀^π B²(θ) sinθ dθ
-              (metade positiva da esfera; usa |θ|).
+            - Assumindo simetria azimutal, Ω = 2π ∫₀^π B²(θ) sinθ dθ, com o
+              padrão **dobrado por simetria** (média de B(+θ) e B(−θ)); não
+              se usa a paridade do integrando ``B²(θ)·sinθ``.
             - Integral: ∑ B²(θ) · sinθ · dθ · 2π
 
         Example:
@@ -89,15 +92,8 @@ class ScienceValidator:
         angles = np.asarray(angles, dtype=float)
         beam_amplitude = np.asarray(beam_amplitude, dtype=float)
 
-        # Metade positiva da esfera (simetria azimutal): usa ângulos >= 0
-        # em ordem monotônica (não |θ| na ordem original — gradiente inválido).
-        idx_pos = np.where(angles >= 0)[0]
-        th = np.deg2rad(angles[idx_pos])
-        power = beam_amplitude[idx_pos] ** 2
-        dth = np.gradient(th)
-
-        # Ω = 2π ∫₀^π B_n(θ) sinθ dθ
-        integral = np.sum(power * np.sin(th) * dth) * 2 * np.pi
+        # Ω = 2π ∫₀^π B²(θ) sinθ dθ — padrão de potência dobrado por simetria.
+        integral = solid_angle(beam_amplitude**2, angles)
 
         # Valida que está normalizado (tolerância de 5%)
         if not (0.95 <= integral <= 1.05):

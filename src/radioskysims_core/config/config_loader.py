@@ -328,6 +328,7 @@ def build_radiotelescope_from_settings(
             effective_area_m2=(
                 ant_cfg.get("effective_area_m2") or horn_cfg.get("effective_area_m2")
             ),
+            gain_dbi=ant_cfg.get("gain_dbi", horn_cfg.get("gain_dbi")),
             frequency_range=antenna_fr,
             pointing=Pointing(
                 mode=pointing_cfg.get("mode", "transit"),
