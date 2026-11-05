@@ -113,7 +113,7 @@ class TestBeamNormalized:
         """Deve falhar quando integral < 0.95."""
         angles = np.linspace(-45, 45, 200)
         # Beam com integral pequena (muito concentrado)
-        beam = np.exp(-(angles / 2) ** 2)
+        beam = np.exp(-((angles / 2) ** 2))
 
         with pytest.raises(ValueError, match="Beam integral"):
             ScienceValidator.validate_beam_normalized(beam, angles)
@@ -174,7 +174,10 @@ class TestTemperatureConversion:
         psd = self._psd_for_T(T_expected, frequency, range_m, _OMEGA_TEST)
 
         T = ScienceValidator.validate_temperature_conversion(
-            psd, frequency, range_m, _OMEGA_TEST,
+            psd,
+            frequency,
+            range_m,
+            _OMEGA_TEST,
             expected_temp_range=(0.1, 1e6),
         )
 
@@ -189,7 +192,10 @@ class TestTemperatureConversion:
         psd = self._psd_for_T(T_expected, frequency, range_m, _OMEGA_TEST)
 
         T = ScienceValidator.validate_temperature_conversion(
-            psd, frequency, range_m, _OMEGA_TEST,
+            psd,
+            frequency,
+            range_m,
+            _OMEGA_TEST,
             expected_temp_range=(0.1, 1e6),
         )
 
@@ -203,7 +209,10 @@ class TestTemperatureConversion:
         psd = self._psd_for_T(T_expected, frequency, range_m, _OMEGA_TEST)
 
         T = ScienceValidator.validate_temperature_conversion(
-            psd, frequency, range_m, _OMEGA_TEST,
+            psd,
+            frequency,
+            range_m,
+            _OMEGA_TEST,
             expected_temp_range=(1, 1e6),
         )
 
@@ -218,7 +227,10 @@ class TestTemperatureConversion:
 
         with pytest.raises(ValueError, match="Unrealistic temperature"):
             ScienceValidator.validate_temperature_conversion(
-                psd_cold, frequency, range_m, _OMEGA_TEST,
+                psd_cold,
+                frequency,
+                range_m,
+                _OMEGA_TEST,
                 expected_temp_range=(0.1, 1e6),
             )
 
@@ -231,7 +243,10 @@ class TestTemperatureConversion:
 
         with pytest.raises(ValueError, match="Unrealistic temperature"):
             ScienceValidator.validate_temperature_conversion(
-                psd_hot, frequency, range_m, _OMEGA_TEST,
+                psd_hot,
+                frequency,
+                range_m,
+                _OMEGA_TEST,
                 expected_temp_range=(1, 1e6),
             )
 
@@ -243,7 +258,10 @@ class TestTemperatureConversion:
         psd = self._psd_for_T(T_val, frequency, range_m, _OMEGA_TEST)
 
         T = ScienceValidator.validate_temperature_conversion(
-            psd, frequency, range_m, _OMEGA_TEST,
+            psd,
+            frequency,
+            range_m,
+            _OMEGA_TEST,
             expected_temp_range=(1, 1e8),
         )
 
@@ -258,27 +276,39 @@ class TestTemperatureConversion:
         base_psd = self._psd_for_T(T_val, frequency, range_m, _OMEGA_TEST)
 
         T_base = ScienceValidator.validate_temperature_conversion(
-            base_psd, frequency, range_m, _OMEGA_TEST,
+            base_psd,
+            frequency,
+            range_m,
+            _OMEGA_TEST,
             expected_temp_range=(0.1, 1e7),
         )
 
         # Aumentar PSD deve aumentar T
         T_high_psd = ScienceValidator.validate_temperature_conversion(
-            base_psd * 10, frequency, range_m, _OMEGA_TEST,
+            base_psd * 10,
+            frequency,
+            range_m,
+            _OMEGA_TEST,
             expected_temp_range=(0.1, 1e7),
         )
         assert T_high_psd > T_base
 
         # Aumentar frequência deve diminuir T (λ² no numerador)
         T_high_freq = ScienceValidator.validate_temperature_conversion(
-            base_psd, frequency * 2, range_m, _OMEGA_TEST,
+            base_psd,
+            frequency * 2,
+            range_m,
+            _OMEGA_TEST,
             expected_temp_range=(0.1, 1e7),
         )
         assert T_high_freq < T_base
 
         # Aumentar Ω deve diminuir T (T ∝ 1/Ω)
         T_wide_beam = ScienceValidator.validate_temperature_conversion(
-            base_psd, frequency, range_m, _OMEGA_TEST * 4,
+            base_psd,
+            frequency,
+            range_m,
+            _OMEGA_TEST * 4,
             expected_temp_range=(0.1, 1e7),
         )
         assert T_wide_beam < T_base
@@ -306,7 +336,10 @@ class TestScienceValidatorIntegration:
         psd = T_val * 4 * np.pi * range_m**2 * (2 * k * Omega) / lam2
 
         T = ScienceValidator.validate_temperature_conversion(
-            psd, frequency, range_m, Omega,
+            psd,
+            frequency,
+            range_m,
+            Omega,
             expected_temp_range=(1, 1e6),
         )
 

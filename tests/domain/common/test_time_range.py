@@ -68,9 +68,7 @@ def test_to_datetime64_exact_step():
         _compute_time_grid,
     )
 
-    tr = TimeRange.from_iso(
-        "2026-07-26T00:00:00", "2026-07-26T00:20:00", resolution=600
-    )
+    tr = TimeRange.from_iso("2026-07-26T00:00:00", "2026-07-26T00:20:00", resolution=600)
     grid = tr.to_datetime64()
     assert grid.dtype == "datetime64[ns]"
     assert len(grid) == 3
@@ -87,9 +85,7 @@ def test_to_numpy():
 
 
 def test_to_pandas():
-    tr = TimeRange.from_iso(
-        "2020-01-01T00:00:00", "2020-01-01T00:10:00", resolution=300
-    )
+    tr = TimeRange.from_iso("2020-01-01T00:00:00", "2020-01-01T00:10:00", resolution=300)
     dt_index = tr.to_pandas()
     assert isinstance(dt_index, pd.DatetimeIndex)
     assert len(dt_index) == 3
