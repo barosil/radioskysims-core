@@ -19,7 +19,7 @@ import xarray as xr
 from skyfield.api import EarthSatellite, wgs84
 
 from radioskysims_core.domain.geometry.interface import GeometryProviderPort
-from radioskysims_core.domain.tracks.factory import TrackFactory
+from radioskysims_core.infrastructure.tracks import TrackFactory
 
 
 class SkyfieldGeometryProvider(GeometryProviderPort):

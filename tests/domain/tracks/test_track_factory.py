@@ -1,7 +1,7 @@
 from datetime import datetime
 
 import pytest
-from radioskysims_core.domain.tracks.factory import TrackFactory
+from radioskysims_core.infrastructure.tracks import TrackFactory
 
 
 def test_factory_init():
