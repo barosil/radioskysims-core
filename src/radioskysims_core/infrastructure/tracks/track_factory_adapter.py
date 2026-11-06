@@ -58,7 +58,9 @@ def _lazy_Tracks():
         Tracks class.
     """
     if "Tracks" not in _lazy_cache:
-        _lazy_cache["Tracks"] = importlib.import_module(".models", __package__).Tracks
+        _lazy_cache["Tracks"] = importlib.import_module(
+            "radioskysims_core.domain.tracks"
+        ).Tracks
     return _lazy_cache["Tracks"]
 
 
