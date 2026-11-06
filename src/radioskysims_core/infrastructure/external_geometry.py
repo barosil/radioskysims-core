@@ -1,31 +1,31 @@
 """
-Módulo: src/radioskysims_core/application/adapters/external_geometry.py
+Módulo: src/radioskysims_core/infrastructure/external_geometry.py
 
 Descrição:
     Implementações de provedores de geometria usando bibliotecas externas.
     Adapter: Skyfield (biblioteca de astrometria externa) → GeometryProviderPort.
-    
-    Movido de domain/geometry/skyfield_provider.py para application/adapters
-    por estar acoplado a Skyfield (dependência externa, não parte do domínio puro).
+
+    Movido de application/adapters para infrastructure (TD-001): este adapter
+    depende de TrackFactory (infraestrutura) e de Skyfield (biblioteca externa),
+    portanto não pertence à camada application.
 
 Copyright BINGO Collaboration
-Last modified: 2026-11-05
+Last modified: 2026-11-06
 """
 
 from __future__ import annotations
 
 import numpy as np
 import xarray as xr
-from skyfield.api import EarthSatellite, wgs84
-
 from radioskysims_core.domain.geometry.interface import GeometryProviderPort
 from radioskysims_core.infrastructure.tracks import TrackFactory
+from skyfield.api import EarthSatellite, wgs84
 
 
 class SkyfieldGeometryProvider(GeometryProviderPort):
     """
     Adapter: Converte tracks orbitais em geometria observacional usando Skyfield.
-    
+
     Implementa GeometryProviderPort (contrato do domínio) usando Skyfield
     como biblioteca externa de cálculos astronômicos.
     """

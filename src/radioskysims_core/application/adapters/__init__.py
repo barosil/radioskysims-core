@@ -2,17 +2,15 @@
 Módulo: src/radioskysims_core/application/adapters/__init__.py
 
 Descrição:
-    Adapters: implementações de ports que dependem de bibliotecas externas.
-    Aqui ficam os wrappers que permitem usar libs externas com contatos do domínio.
+    Este pacote foi esvaziado (TD-001): os adapters concretos que dependem de
+    infraestrutura (SkyfieldGeometryProvider) foram movidos para
+    ``radioskysims_core.infrastructure``, pois application não deve depender de
+    implementações concretas de infrastructure.
 
 Copyright BINGO Collaboration
-Last modified: 2026-11-05
+Last modified: 2026-11-06
 """
 
 from __future__ import annotations
 
-from radioskysims_core.application.adapters.external_geometry import (
-    SkyfieldGeometryProvider,
-)
-
-__all__ = ["SkyfieldGeometryProvider"]
+__all__: list[str] = []

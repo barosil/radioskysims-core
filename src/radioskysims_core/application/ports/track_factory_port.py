@@ -17,6 +17,8 @@ from typing import Any
 
 import xarray as xr
 
+from radioskysims_core.domain.tracks.models import Tracks
+
 
 class TrackFactoryPort(ABC):
     """
@@ -25,11 +27,31 @@ class TrackFactoryPort(ABC):
     Uma implementação deve ser capaz de:
     - receber satélites para um intervalo de tempo
     - calcular posições (coordenadas xyz)
-    - retornar um dataset xarray
+    - retornar um objeto Tracks do domínio (ou dataset xarray)
 
     Esta port permite desacoplar a lógica de construção de tracks
     (Skyfield, computação) da lógica de negócio (application).
     """
+
+    @abstractmethod
+    def build(
+        self,
+        satellites_block: Any = None,
+        scheduler: str | None = None,
+    ) -> Tracks:
+        """
+        Constrói tracks a partir de blocos de satélites.
+
+        Args:
+            satellites_block:
+                Mapeamento de tempos → bloco (timerange + satélites).
+            scheduler:
+                Nome opcional do scheduler dask.
+
+        Returns:
+            Tracks (entidade de domínio) contendo o dataset de trajetórias.
+        """
+        ...
 
     @abstractmethod
     def build_dataset(
