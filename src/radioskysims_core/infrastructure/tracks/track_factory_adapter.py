@@ -7,7 +7,6 @@ import dask
 import numpy as np
 import xarray as xr
 from dask import array as da
-
 from radioskysims_core.application.ports.track_factory_port import (
     TrackFactoryPort,
 )
@@ -58,9 +57,7 @@ def _lazy_Tracks():
         Tracks class.
     """
     if "Tracks" not in _lazy_cache:
-        _lazy_cache["Tracks"] = importlib.import_module(
-            "radioskysims_core.domain.tracks"
-        ).Tracks
+        _lazy_cache["Tracks"] = importlib.import_module("radioskysims_core.domain.tracks").Tracks
     return _lazy_cache["Tracks"]
 
 
