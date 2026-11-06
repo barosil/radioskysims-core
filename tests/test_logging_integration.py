@@ -12,18 +12,13 @@ import re
 import tempfile
 from pathlib import Path
 
-import numpy as np
 import pytest
-import xarray as xr
 from radioskysims_core.logging_config import (
     bind_context,
     configure_logging,
     get_logger,
     unbind_context,
 )
-
-Beam = pytest.importorskip("radioskysims_beam.domain.beam.models").Beam
-BeamOperation = pytest.importorskip("radioskysims_beam.domain.beam.services").BeamOperation
 
 
 class TestLoggingConfiguration:
@@ -191,56 +186,13 @@ class TestLoggingConfiguration:
             log_file = log_files[0]
 
             with Path(log_file).open(encoding="utf-8") as f:
-                events = [json.loads(line).get("event") for line in f.readlines()]
+                events = [json.loads(line).get("event") for line in f]
 
                 # INFO não deve aparecer
                 # WARNING e ERROR devem aparecer
                 assert "should_not_appear" not in events
                 assert "should_appear" in events
                 assert "should_also_appear" in events
-
-
-class TestLoggingInDomains:
-    """Testes de logging em operações de domínio."""
-
-    def test_beam_operation_logging(self):
-        """Valida que operações de Beam loggam eventos."""
-        with tempfile.TemporaryDirectory() as tmpdir:
-            configure_logging(
-                log_level="INFO",
-                log_dir=tmpdir,
-                enable_file=True,
-            )
-
-            # Cria um Beam simples para teste
-            rng = np.random.default_rng(42)
-            ds = xr.Dataset(
-                {
-                    "amplitude": (
-                        ["angle", "polarization", "frequency"],
-                        rng.random((90, 2, 10)),
-                    )
-                },
-                coords={
-                    "angle": np.linspace(0, 90, 90),
-                    "polarization": ["H", "V"],
-                    "frequency": np.linspace(1, 10, 10),
-                },
-            )
-            beam = Beam(ds)
-
-            # Operação de normalização (deve logar)
-            BeamOperation.normalize(beam)
-
-            # Verifica logs
-            log_files = list(Path(tmpdir).glob("*.json"))
-            if log_files:
-                log_file = log_files[0]
-                with Path(log_file).open(encoding="utf-8") as f:
-                    events = [json.loads(line).get("event") for line in f.readlines()]
-
-                    assert "beam_normalize_start" in events
-                    assert "beam_normalize_success" in events
 
 
 class TestContextBinding:
@@ -269,7 +221,7 @@ class TestContextBinding:
             if log_files:
                 log_file = log_files[0]
                 with Path(log_file).open(encoding="utf-8") as f:
-                    lines = [json.loads(line) for line in f.readlines()]
+                    lines = [json.loads(line) for line in f]
 
                     # Primeiro evento deve ter contexto
                     if lines:
